@@ -9,45 +9,31 @@ using namespace cv;
 
 void main()
 {
-	Mat img = Mat::zeros(Size(1000, 1000), CV_8UC3);
-	//circle(img, Point(500, 500), 300, Scalar(0, 0, 255), 15);
-		int l = 1;
-		int x = 0;
-		int y = 0;
-		namedWindow("img");
-		createTrackbar("angle", "img", &l, 360);
-		createTrackbar("x", "img", &x, 400);
-		createTrackbar("y", "img", &y, 400);
+	const Size imgSize(1000, 1000);
+	Mat img = Mat::zeros(imgSize, CV_8UC3);
+	int angle = 0;
+	Point center(500, 500);
+	Point leftup(400, 400);
+	Point rightdown(600, 600);
+	namedWindow("Image");
+	namedWindow("Control");
+	createTrackbar("Angle", "Control", &angle, 360);
+	createTrackbar("x", "Control", &center.x, imgSize.width);
+	createTrackbar("y", "Control", &center.y, imgSize.height);
+	createTrackbar("Left Up x", "Control", &leftup.x, imgSize.width);
+	createTrackbar("Left Up y", "Control", &leftup.y, imgSize.height);
+	createTrackbar("Right down x", "Control", &rightdown.x, imgSize.width);
+	createTrackbar("Right down y", "Control", &rightdown.y, imgSize.height);
 
 	while (waitKey(30) != 27)
 	{
-		Point center(x, y);
-		float r = (CV_PI/180.0) * (l);
-		//r = l;
-		Square sq(Point(300, 300), Point(300, 500), Point(500, 500), Point(500, 300));
+		Square sq(leftup, Point(leftup.x, rightdown.y), rightdown, Point(rightdown.x, leftup.y));
 
-		/*Mat l2 = (Mat_<float>(3, 3) << 1, 0, 0,
-				  0, 1, 0,
-				  -x, -y, 1);
-
-		Mat kern = (Mat_<float>(3, 3) << cos(r), sin(r),0,
-					-sin(r), cos(r), 0,
-					0,0, 1);
-
-		Mat r2 = (Mat_<float>(3, 3) << 1,0, 0,
-					0,1, 0,
-					x, y, 1);
-
-		Mat k = l2*kern*r2;*/
-		Mat k = sq.buildRotationMatrix(r, Point(x, y));
-
-		auto i = img.clone();
-		circle(i, center, 5, Scalar::all(255), -1);
-		//sq.move(-x,-y);
-		sq.applyKernel(k);
-		//sq.move(x,y);
-		sq.draw(i);
-		imshow("img", i);
+		Mat kernel = Square::buildRotationMatrix(angle, center);
+		auto imgCopy = img.clone();
+		circle(imgCopy, center, 5, Scalar::all(255), -1);
+		sq.applyKernel(kernel);
+		sq.draw(imgCopy);
+		imshow("img", imgCopy);
 	}
-	waitKey();
 }

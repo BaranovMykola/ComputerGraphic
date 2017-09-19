@@ -1,5 +1,6 @@
 #include "Square.h"
 #include <opencv2\imgproc.hpp>
+#include <vector>
 
 using namespace cv;
 
@@ -24,24 +25,6 @@ void Square::draw(cv::Mat & img)
 	}
 }
 
-void Square::move(int delt)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		points[i].x += delt;
-		points[i].y += delt;
-	}
-}
-
-void Square::move(int x, int y)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		points[i].x += x;
-		points[i].y += y;
-	}
-}
-
 void Square::applyKernel(cv::Mat & kern)
 {
 	for (int i = 0; i < 4; i++)
@@ -52,14 +35,15 @@ void Square::applyKernel(cv::Mat & kern)
 
 cv::Mat Square::buildRotationMatrix(float angle, Point center)
 {
+	float rad = (CV_PI / 180.0) * (angle);
 	int x = center.x;
 	int y = center.y;
 	Mat move = (Mat_<float>(3, 3) << 1, 0, 0,
 			  0, 1, 0,
 			  -x, -y, 1);
 
-	Mat rotate = (Mat_<float>(3, 3) << cos(angle), sin(angle), 0,
-				-sin(angle), cos(angle), 0,
+	Mat rotate = (Mat_<float>(3, 3) << cos(rad), sin(rad), 0,
+				-sin(rad), cos(rad), 0,
 				0, 0, 1);
 
 	Mat moveBack = (Mat_<float>(3, 3) << 1, 0, 0,
@@ -70,31 +54,25 @@ cv::Mat Square::buildRotationMatrix(float angle, Point center)
 	return kernel;
 }
 
-cv::Point3i operator*(cv::Point3i p, cv::Mat & kern)
+cv::Point3i operator*(cv::Point3i point, cv::Mat & kern)
 {
-	Point3i res;
-	/*res.x = kern.at<float>(0, 0)*p.x + kern.at<float>(Point(1, 0))*p.y + kern.at<float>(Point(2, 0));
-	res.y = kern.at<float>(Point(1,0))*p.x + kern.at<float>(Point(1, 1))*p.y + kern.at<float>(Point(2, 1));
-	res.z = kern.at<float>(0, 2)*p.x + kern.at<float>(Point(1, 2))*p.y + kern.at<float>(Point(2, 2));*/
-	auto x1 = kern.at<float>(0, 0);
-	auto x2 = kern.at<float>(1, 0);
-	auto x3 = kern.at<float>(2, 0);
-	//p.x += x3;
-	res.x = p.x*x1 + p.y*x2 + x3;
+	Point3i transformedPoint;
+	std::vector<int*> newCoordinates;
+	newCoordinates.push_back(&transformedPoint.x);
+	newCoordinates.push_back(&transformedPoint.y);
+	newCoordinates.push_back(&transformedPoint.z);
 
-	auto y1 = kern.at<float>(0, 1);
-	auto y2 = kern.at<float>(1, 1);
-	auto y3 = kern.at<float>(2, 1);
-	//p.y += y3;
-	res.y = p.x*y1 + p.y*y2 + y3;
+	std::vector<int> oldCoordinates;
+	oldCoordinates.push_back(point.x);
+	oldCoordinates.push_back(point.y);
+	oldCoordinates.push_back(point.z);
 
-	auto z1 = kern.at<float>(0, 2);
-	auto z2 = kern.at<float>(1, 2);
-	auto z3 = kern.at<float>(2, 2);
-	res.z = p.x*z1 + p.y*z2 + z3;
-	/*res.x -= x3;
-	res.y -= y3;*/
-	//res.z = 1;
-	return res;
-
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			*newCoordinates[i] += oldCoordinates[j]* kern.at<float>(j, i);
+		}
+	}
+	return transformedPoint;
 }
