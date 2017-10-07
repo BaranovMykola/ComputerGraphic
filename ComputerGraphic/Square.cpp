@@ -4,7 +4,7 @@
 
 using namespace cv;
 
-Square::Square(Point pt0, Point pt1, Point pt2, Point pt3)
+Shape::Shape(Point pt0, Point pt1, Point pt2, Point pt3)
 {
 	points[0] = Point3i(pt0.x, pt0.y, 1);
 	points[1] = Point3i(pt1.x, pt1.y, 1);
@@ -12,28 +12,47 @@ Square::Square(Point pt0, Point pt1, Point pt2, Point pt3)
 	points[3] = Point3i(pt3.x, pt3.y, 1);
 }
 
+Shape::Shape(std::initializer_list<Point> lst)
+{
+	for (auto i : lst)
+	{
+		pointsVec.push_back(Point3i(i.x, i.y, 1));
+	}
+}
 
-Square::~Square()
+
+Shape::~Shape()
 {
 }
 
-void Square::draw(cv::Mat & img)
+void Shape::draw(cv::Mat & img)
 {
-	for (int i = 0; i < 4; i++)
+	/*for (int i = 0; i < 4; i++)
 	{
 		line(img, Point(points[i].x, points[i].y), Point(points[(i + 1) % 4].x, points[(i+1)%4].y), Scalar(0, 0, 255), 10);
+	}*/
+
+	for (int i = 0; i < pointsVec.size(); i++)
+	{
+		circle(img, Point(pointsVec[i].x, pointsVec[i].y), 12, randomColor(rng), -1);
+		line(img, Point(pointsVec[i].x, pointsVec[i].y), Point(pointsVec[(i + 1) % pointsVec.size()].x, pointsVec[(i + 1) % pointsVec.size()].y), Scalar(0, 0, 255), 10);
 	}
 }
 
-void Square::applyKernel(cv::Mat & kern)
+void Shape::applyKernel(cv::Mat & kern)
 {
-	for (int i = 0; i < 4; i++)
+	/*for (int i = 0; i < 4; i++)
 	{
 		points[i] = points[i] * kern;
+	}*/
+
+	for (int i = 0; i < pointsVec.size(); i++)
+	{
+		pointsVec[i] = pointsVec[i] * kern;
 	}
 }
 
-cv::Mat Square::buildRotationMatrix(float angle, Point center)
+cv::Mat Shape::buildRotationMatrix(float angle, Point center)
 {
 	float rad = (CV_PI / 180.0) * (angle);
 	int x = center.x;
@@ -76,3 +95,11 @@ cv::Point3i operator*(cv::Point3i point, cv::Mat & kern)
 	}
 	return transformedPoint;
 }
+
+static Scalar randomColor(RNG& rng)
+{
+	int icolor = (unsigned)rng;
+	return Scalar(icolor & 255, (icolor >> 8) & 255, (icolor >> 16) & 255);
+}
+
+RNG Shape::rng = RNG();
