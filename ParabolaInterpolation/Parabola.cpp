@@ -1,5 +1,7 @@
 #include "Parabola.h"
 
+#include <opencv2/imgproc.hpp>
+
 
 Parabola::Parabola(double _a, double _b, double _c) :
 	a(_a),
@@ -106,3 +108,37 @@ void Parabola::drawAverage(cv::Mat & img, const Parabola par1, const Parabola pa
 		}
 	}
 }
+
+void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points)
+{
+	std::sort(points.begin(), points.end(), [](auto i, auto j) { return i.x < j.x; });
+	Parabola first(points[0], points[1], points[2]);
+	first.draw(img, points[0].x, points[1].x, nextColor());
+	for (int i = 1; i < points.size()-2; i++)
+	{
+		Parabola second(points[i], points[i+1], points[i + 2]);
+		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
+		first = second;
+	}
+	int last = points.size() - 1;
+	Parabola end(points[last - 2], points[last - 1], points[last]);
+	end.draw(img, points[last - 1].x, points[last].x, nextColor());
+}
+
+void Parabola::drawPoints(cv::Mat & img, std::vector<cv::Point> points)
+{
+	for (auto i : points)
+	{
+		cv::circle(img, i, 6, nextColor(), -1);
+	}
+}
+
+cv::Vec3b Parabola::nextColor()
+{
+	return colors[colorIndex++%colors.size()];
+}
+
+std::vector<cv::Vec3b> Parabola::colors{ cv::Vec3b(0,0,255), cv::Vec3b(0,255,0), cv::Vec3b(255,0,0),
+										cv::Vec3b(255,0,255), cv::Vec3b(255,255,0), cv::Vec3b::all(255) };
+
+int Parabola::colorIndex = 0;
