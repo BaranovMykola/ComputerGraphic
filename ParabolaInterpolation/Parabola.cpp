@@ -86,3 +86,23 @@ double Parabola::y(double x) const
 {
 	return a*std::pow(x, 2) + b*x + c;
 }
+
+void Parabola::drawAverage(cv::Mat & img, const Parabola par1, const Parabola par2, int from, int to, cv::Vec3b color)
+{
+	double h1 = 1 / (1 + par1.a);
+	h1 = std::abs(h1) > 1 ? 1 : h1;
+	double h2 = 1 / (1 + par2.a);
+	h2 = std::abs(h2) > 1 ? 1 : h2;
+	auto h = std::min({ h1,h2 });
+	for (double i = from; i < to; i += h)
+	{
+		auto y1 = par1.y(i);
+		auto y2 = par2.y(i);
+		auto y = (y1+y2) / 2;
+		if (y < img.rows && y >= 0)
+		{
+			cv::Point pixel(i, y);
+			img.at<cv::Vec3b>(pixel) = color;
+		}
+	}
+}

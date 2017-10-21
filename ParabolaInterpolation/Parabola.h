@@ -12,10 +12,10 @@ public:
 	void draw_(cv::Mat img);
 	double y_(double theta)const;
 	double y(double x)const;
+	static void drawAverage(cv::Mat& img, const Parabola par1, const Parabola par2, int from, int to, cv::Vec3b color = cv::Vec3b::all(255));
 private:
 	double a;
 	double b;
 	double c;
 	double a_;
 };
-
