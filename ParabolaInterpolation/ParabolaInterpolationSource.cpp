@@ -23,7 +23,7 @@ int main()
 	namedWindow("draw");
 	RNG rnd(10);
 	Parabola::drawPoints(draw, points);
-	Parabola::interpolate(draw, points);
+	Parabola::interpolate(draw, points,300);
 	imshow("draw", draw);
 
 	waitKey();

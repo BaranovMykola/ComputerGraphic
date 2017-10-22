@@ -13,7 +13,7 @@ public:
 	double y_(double theta)const;
 	double y(double x)const;
 	static void drawAverage(cv::Mat& img, const Parabola par1, const Parabola par2, int from, int to, cv::Vec3b color = cv::Vec3b::all(255));
-	static void interpolate(cv::Mat& img, std::vector<cv::Point> points);
+	static void interpolate(cv::Mat& img, std::vector<cv::Point> points, int delay);
 	static void drawPoints(cv::Mat& img, std::vector<cv::Point> points);
 	static cv::Vec3b nextColor();
 private:

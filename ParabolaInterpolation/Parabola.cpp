@@ -1,6 +1,7 @@
 #include "Parabola.h"
 
 #include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 
 Parabola::Parabola(double _a, double _b, double _c) :
@@ -109,17 +110,28 @@ void Parabola::drawAverage(cv::Mat & img, const Parabola par1, const Parabola pa
 	}
 }
 
-void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points)
+void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int delay)
 {
 	std::sort(points.begin(), points.end(), [](auto i, auto j) { return i.x < j.x; });
 	Parabola first(points[0], points[1], points[2]);
 	first.draw(img, points[0].x, points[1].x, nextColor());
+	colorIndex--;
 	for (int i = 1; i < points.size()-2; i++)
 	{
 		Parabola second(points[i], points[i+1], points[i + 2]);
+		auto copy = img.clone();
+		first.draw(copy, 0, img.cols, nextColor());
+		cv::imshow("draw", copy);
+		cv::waitKey(delay);
+		second.draw(copy, 0, img.cols, nextColor());
+		cv::imshow("draw", copy);
 		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
+		cv::waitKey(delay);
+		cv::imshow("draw", img);
+		cv::waitKey(delay);
 		first = second;
 	}
+	(--colorIndex)--;
 	int last = points.size() - 1;
 	Parabola end(points[last - 2], points[last - 1], points[last]);
 	end.draw(img, points[last - 1].x, points[last].x, nextColor());
