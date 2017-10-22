@@ -9,6 +9,17 @@
 using namespace cv;
 using namespace std;
 
+void click(int event, int x, int y, int flags, void *userdata)
+{
+	if (event == CV_EVENT_LBUTTONDOWN)
+	{
+		auto vec = static_cast<std::pair<std::vector<cv::Point>*,cv::Mat*>*>(userdata);
+		vec->first->emplace_back(x, y);
+		Parabola::drawPoints(*vec->second, *vec->first);
+		imshow("draw", *vec->second);
+	}
+}
+
 int main()
 {
 	Mat draw = Mat::zeros(700, 1600, CV_8UC3);
@@ -21,6 +32,9 @@ int main()
 	std::vector<Point> points{ A,B,C,D,E };
 
 	namedWindow("draw");
+	setMouseCallback("draw", click, &make_pair(&points,&draw));
+	imshow("draw", draw);
+	waitKey();
 	RNG rnd(10);
 	Parabola::drawPoints(draw, points);
 	Parabola::interpolate(draw, points,300);

@@ -39,7 +39,7 @@ Parabola::~Parabola()
 void Parabola::draw(cv::Mat img, int from, int to, cv::Vec3b color) const
 {
 	double h = 1/(1+b);
-	h = std::abs(h) > 1 ? 1 : h;
+	h = std::abs(h) > 1 ? 1 : std::abs(h);
 	for (double i = from; i < to; i+=h)
 	{
 		auto y = this->y(i);
@@ -120,13 +120,21 @@ void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int del
 	{
 		Parabola second(points[i], points[i+1], points[i + 2]);
 		auto copy = img.clone();
+
 		first.draw(copy, 0, img.cols, nextColor());
 		cv::imshow("draw", copy);
 		cv::waitKey(delay);
+
 		second.draw(copy, 0, img.cols, nextColor());
 		cv::imshow("draw", copy);
-		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
+		Parabola::drawAverage(copy, first, second, 0, img.cols, nextColor());
 		cv::waitKey(delay);
+
+		cv::imshow("draw", copy);
+		cv::waitKey(delay);
+
+		--colorIndex;
+		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
 		cv::imshow("draw", img);
 		cv::waitKey(delay);
 		first = second;
@@ -139,6 +147,7 @@ void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int del
 
 void Parabola::drawPoints(cv::Mat & img, std::vector<cv::Point> points)
 {
+	colorIndex = 0;
 	for (auto i : points)
 	{
 		cv::circle(img, i, 6, nextColor(), -1);
