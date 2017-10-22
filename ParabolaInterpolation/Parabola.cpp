@@ -1,7 +1,9 @@
 #include "Parabola.h"
 
 #include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
+#include <thread>
 
 Parabola::Parabola(double _a, double _b, double _c) :
 	a(_a),
@@ -47,41 +49,16 @@ void Parabola::draw(cv::Mat img, int from, int to, cv::Vec3b color) const
 			cv::Point pixel(i, y);
 			img.at<cv::Vec3b>(pixel) = color;
 		}
-	}
-}
-
-void Parabola::draw_(cv::Mat img)
-{
-	double  h = 0.01;
-	auto delt = std::pow(-1 * (1 / (2 * std::sqrt(a_))), 2);
-	if (std::abs(delt) > 1)
-	{
-		delt = 1;
-	}
-	for (double i = 0; i < 1000;)
-	{
-		double theta = std::atan(std::sqrt(i));
-		int y = 2 * std::sqrt(a_)*tan(theta);
-		cv::Point pixel1(i, y);
-		cv::Point pixel2(i, -y);
-		i += std::abs(delt);
-		if (i >= 0 && i < img.cols)
+		if (delay > 0 && (int)(i + h) != (int)i)
 		{
-			if (y < img.rows && y >= 0)
+			cv::imshow("draw", img);
+			int response = cv::waitKey(delay);
+			if (response == 27)
 			{
-				img.at<cv::Vec3b>(pixel1) = cv::Vec3b::all(255);
-			}
-			if (-y < img.rows && -y >= 0)
-			{
-				img.at<cv::Vec3b>(pixel2) = cv::Vec3b::all(255);
+				std::exit(0);
 			}
 		}
 	}
-}
-
-double Parabola::y_(double theta) const
-{
-	return 0;
 }
 
 double Parabola::y(double x) const
@@ -106,6 +83,15 @@ void Parabola::drawAverage(cv::Mat & img, const Parabola par1, const Parabola pa
 			cv::Point pixel(i, y);
 			img.at<cv::Vec3b>(pixel) = color;
 		}
+		if (delay > 0 && (int)(i+h) != (int)i)
+		{
+			cv::imshow("draw", img);
+			int response = cv::waitKey(delay);
+			if (response == 27)
+			{
+				std::exit(0);
+			}
+		}
 	}
 }
 
@@ -117,7 +103,21 @@ void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points)
 	for (int i = 1; i < points.size()-2; i++)
 	{
 		Parabola second(points[i], points[i+1], points[i + 2]);
+		auto copy = img.clone();
+		if (delay > 0)
+		{
+			first.draw(copy, points[i].x, points[i + 1].x, nextColor());
+			second.draw(copy, points[i].x, points[i + 1].x, nextColor());
+			Parabola::drawAverage(copy, first, second, points[i].x, points[i + 1].x, nextColor());
+		}
+		auto oldDelay = delay;
+		delay = 0;
+		first.draw(copy, 0, img.cols, nextColor());
+		second.draw(copy, 0, img.cols, nextColor());
+		cv::imshow("draw", copy);
 		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
+		delay = oldDelay;
+		cv::waitKey(delay * 1000);
 		first = second;
 	}
 	int last = points.size() - 1;
@@ -142,3 +142,7 @@ std::vector<cv::Vec3b> Parabola::colors{ cv::Vec3b(0,0,255), cv::Vec3b(0,255,0),
 										cv::Vec3b(255,0,255), cv::Vec3b(255,255,0), cv::Vec3b::all(255) };
 
 int Parabola::colorIndex = 0;
+
+int Parabola::delay = 0;
+
+int Parabola::boost = 10;

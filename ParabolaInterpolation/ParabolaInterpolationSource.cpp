@@ -20,7 +20,9 @@ int main()
 
 	std::vector<Point> points{ A,B,C,D,E };
 
-	namedWindow("draw");
+	namedWindow("Delay");
+	Parabola::delay = 1;
+	createTrackbar("Delay", "Delay", &Parabola::delay, 20);
 	RNG rnd(10);
 	Parabola::drawPoints(draw, points);
 	Parabola::interpolate(draw, points);
