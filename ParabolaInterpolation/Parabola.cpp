@@ -40,14 +40,17 @@ void Parabola::draw(cv::Mat img, int from, int to, cv::Vec3b color) const
 {
 	double h = 1/(1+b);
 	h = std::abs(h) > 1 ? 1 : std::abs(h);
-	for (double i = from; i < to; i+=h)
+	cv::Point last(from,y(from));
+	for (double i = from; i < to+0.5; i++)
 	{
 		auto y = this->y(i);
-		if (y < img.rows && y >= 0)
-		{
+		/*if (y < img.rows && y >= 0)
+		{*/
 			cv::Point pixel(i, y);
-			img.at<cv::Vec3b>(pixel) = color;
-		}
+			//img.at<cv::Vec3b>(pixel) = color;
+			line(img, last, pixel, color, 1);
+			last = pixel;
+		//}
 	}
 }
 
@@ -97,21 +100,29 @@ void Parabola::drawAverage(cv::Mat & img, const Parabola par1, const Parabola pa
 	double h2 = 1 / (1 + par2.a);
 	h2 = std::abs(h2) > 1 ? 1 : h2;
 	auto h = std::min({ h1,h2 });
-	for (double i = from; i < to; i += h)
+	cv::Point prev(from, (par1.y(from) + par2.y(from)) / 2);
+	for (double i = from; i < to+0.5; i ++)
 	{
 		auto y1 = par1.y(i);
 		auto y2 = par2.y(i);
 		auto y = (y1+y2) / 2;
-		if (y < img.rows && y >= 0)
-		{
+		/*if (y < img.rows && y >= 0)
+		{*/
 			cv::Point pixel(i, y);
-			img.at<cv::Vec3b>(pixel) = color;
-		}
+			//img.at<cv::Vec3b>(pixel) = color;
+			line(img, prev, pixel, color, 1);
+			prev = pixel;
+		//}
 	}
 }
 
 void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int delay)
 {
+	if (points.size() < 3)
+	{
+		cv::putText(img, "Not enough points", cv::Point(img.rows / 4, img.cols / 10), CV_FONT_HERSHEY_COMPLEX, 3, cv::Scalar::all(255));
+		return;
+	}
 	std::sort(points.begin(), points.end(), [](auto i, auto j) { return i.x < j.x; });
 	Parabola first(points[0], points[1], points[2]);
 	first.draw(img, points[0].x, points[1].x, nextColor());
@@ -119,24 +130,29 @@ void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int del
 	for (int i = 1; i < points.size()-2; i++)
 	{
 		Parabola second(points[i], points[i+1], points[i + 2]);
-		auto copy = img.clone();
+		if (delay >= 0)
+		{
+			auto copy = img.clone();
 
-		first.draw(copy, 0, img.cols, nextColor());
-		cv::imshow("draw", copy);
-		cv::waitKey(delay);
+			first.draw(copy, 0, img.cols, nextColor());
+			cv::imshow("draw", copy);
+			cv::waitKey(delay);
 
-		second.draw(copy, 0, img.cols, nextColor());
-		cv::imshow("draw", copy);
-		Parabola::drawAverage(copy, first, second, 0, img.cols, nextColor());
-		cv::waitKey(delay);
+			second.draw(copy, 0, img.cols, nextColor());
+			cv::imshow("draw", copy);
+			Parabola::drawAverage(copy, first, second, 0, img.cols, nextColor());
+			cv::waitKey(delay);
 
-		cv::imshow("draw", copy);
-		cv::waitKey(delay);
-
+			cv::imshow("draw", copy);
+			cv::waitKey(delay);
+		}
 		--colorIndex;
 		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
-		cv::imshow("draw", img);
-		cv::waitKey(delay);
+		if (delay >= 0)
+		{
+			cv::imshow("draw", img);
+			cv::waitKey(delay);
+		}
 		first = second;
 	}
 	(--colorIndex)--;
