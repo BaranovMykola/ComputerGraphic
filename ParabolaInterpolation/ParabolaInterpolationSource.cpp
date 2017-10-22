@@ -24,13 +24,12 @@ int main()
 {
 	Mat draw = Mat::zeros(700, 1600, CV_8UC3);
 	std::vector<Point> points{};
-
 	namedWindow("draw");
 	setMouseCallback("draw", click, &make_pair(&points,&draw));
 	imshow("draw", draw);
 	waitKey();
 
-	Parabola::interpolate(draw, points,100);
+	Parabola::interpolate(draw, points,1);
 
 	imshow("draw", draw);
 	waitKey();

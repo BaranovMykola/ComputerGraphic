@@ -3,16 +3,13 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+#include <iostream>
+
 
 Parabola::Parabola(double _a, double _b, double _c) :
 	a(_a),
 	b(_b),
 	c(_c)
-{
-}
-
-Parabola::Parabola(double _a) :
-	a_(_a)
 {
 }
 
@@ -38,54 +35,16 @@ Parabola::~Parabola()
 
 void Parabola::draw(cv::Mat img, int from, int to, cv::Vec3b color) const
 {
-	double h = 1/(1+b);
+	double h = 1 / (1 + b);
 	h = std::abs(h) > 1 ? 1 : std::abs(h);
-	cv::Point last(from,y(from));
-	for (double i = from; i < to+0.5; i++)
+	cv::Point last(from, y(from));
+	for (double i = from; i < to + 0.5; i++)
 	{
 		auto y = this->y(i);
-		/*if (y < img.rows && y >= 0)
-		{*/
-			cv::Point pixel(i, y);
-			//img.at<cv::Vec3b>(pixel) = color;
-			line(img, last, pixel, color, 1);
-			last = pixel;
-		//}
+		cv::Point pixel(i, y);
+		line(img, last, pixel, color, 1);
+		last = pixel;
 	}
-}
-
-void Parabola::draw_(cv::Mat img)
-{
-	double  h = 0.01;
-	auto delt = std::pow(-1 * (1 / (2 * std::sqrt(a_))), 2);
-	if (std::abs(delt) > 1)
-	{
-		delt = 1;
-	}
-	for (double i = 0; i < 1000;)
-	{
-		double theta = std::atan(std::sqrt(i));
-		int y = 2 * std::sqrt(a_)*tan(theta);
-		cv::Point pixel1(i, y);
-		cv::Point pixel2(i, -y);
-		i += std::abs(delt);
-		if (i >= 0 && i < img.cols)
-		{
-			if (y < img.rows && y >= 0)
-			{
-				img.at<cv::Vec3b>(pixel1) = cv::Vec3b::all(255);
-			}
-			if (-y < img.rows && -y >= 0)
-			{
-				img.at<cv::Vec3b>(pixel2) = cv::Vec3b::all(255);
-			}
-		}
-	}
-}
-
-double Parabola::y_(double theta) const
-{
-	return 0;
 }
 
 double Parabola::y(double x) const
@@ -101,18 +60,14 @@ void Parabola::drawAverage(cv::Mat & img, const Parabola par1, const Parabola pa
 	h2 = std::abs(h2) > 1 ? 1 : h2;
 	auto h = std::min({ h1,h2 });
 	cv::Point prev(from, (par1.y(from) + par2.y(from)) / 2);
-	for (double i = from; i < to+0.5; i ++)
+	for (double i = from; i < to + 0.5; i++)
 	{
 		auto y1 = par1.y(i);
 		auto y2 = par2.y(i);
-		auto y = (y1+y2) / 2;
-		/*if (y < img.rows && y >= 0)
-		{*/
-			cv::Point pixel(i, y);
-			//img.at<cv::Vec3b>(pixel) = color;
-			line(img, prev, pixel, color, 1);
-			prev = pixel;
-		//}
+		auto y = (y1 + y2) / 2;
+		cv::Point pixel(i, y);
+		line(img, prev, pixel, color, 1);
+		prev = pixel;
 	}
 }
 
@@ -127,9 +82,9 @@ void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int del
 	Parabola first(points[0], points[1], points[2]);
 	first.draw(img, points[0].x, points[1].x, nextColor());
 	colorIndex--;
-	for (int i = 1; i < points.size()-2; i++)
+	for (int i = 1; i < points.size() - 2; i++)
 	{
-		Parabola second(points[i], points[i+1], points[i + 2]);
+		Parabola second(points[i], points[i + 1], points[i + 2]);
 		if (delay >= 0)
 		{
 			auto copy = img.clone();
@@ -140,11 +95,17 @@ void Parabola::interpolate(cv::Mat & img, std::vector<cv::Point> points, int del
 
 			second.draw(copy, 0, img.cols, nextColor());
 			cv::imshow("draw", copy);
-			Parabola::drawAverage(copy, first, second, 0, img.cols, nextColor());
 			cv::waitKey(delay);
 
+			Parabola::drawAverage(copy, first, second, 0, img.cols, nextColor());
 			cv::imshow("draw", copy);
 			cv::waitKey(delay);
+
+			auto der = 2 * second.a*points[i].x + second.b + 2 * first.a*points[i].x + first.b;
+			cv::putText(img, std::to_string(der), points[i], CV_FONT_HERSHEY_COMPLEX, 0.5, nextColor());
+			auto der2 = 2 * second.a*points[i + 1].x + second.b + 2 * first.a*points[i + 1].x + first.b;
+			--colorIndex;
+			cv::putText(img, std::to_string(der2), points[i + 1] - cv::Point(0, -60), CV_FONT_HERSHEY_COMPLEX, 0.5, nextColor());
 		}
 		--colorIndex;
 		Parabola::drawAverage(img, first, second, points[i].x, points[i + 1].x, nextColor());
