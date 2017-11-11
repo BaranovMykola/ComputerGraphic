@@ -11,7 +11,7 @@ public:
 	void draw(cv::Mat& img);
 	std::vector<cv::Point3f> plot(double h, double lowerBound, double upperBound);
 	static std::vector<cv::Point3f> interpolate(std::vector<cv::Point3f> pivot, cv::Mat& img);
-	static void draw(cv::Mat& img, std::vector<cv::Point3f> curve, std::vector<cv::Point3f> pivot, double f, double t, double x, double y);
+	static void draw(cv::Mat& img, std::vector<cv::Point3f> curve, std::vector<cv::Point3f> pivot, double f, double t, std::vector<int> move, double scale);
 	cv::Point3f take(double t);
 	double x(double t);
 	double y(double t);
