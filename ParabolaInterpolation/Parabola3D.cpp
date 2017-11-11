@@ -11,7 +11,7 @@ cv::Point3f operator*(cv::Point3f point, cv::Mat & kern)
 	newCoordinates.push_back(&transformedPoint.y);
 	newCoordinates.push_back(&transformedPoint.z);
 
-	std::vector<int> oldCoordinates;
+	std::vector<float> oldCoordinates;
 	oldCoordinates.push_back(point.x);
 	oldCoordinates.push_back(point.y);
 	oldCoordinates.push_back(point.z);
@@ -78,7 +78,7 @@ std::vector<cv::Point3f> Parabola3D::plot(double h, double lowerBound, double up
 std::vector<cv::Point3f> Parabola3D::interpolate(std::vector<cv::Point3f> pivot,cv::Mat& img)
 {
 	std::vector<Point3f> curve;
-	double h = 0.0001;
+	double h = 0.1;
 	Parabola3D first(pivot[0], pivot[1], pivot[2]);
 	auto firstPlot = first.plot(h,0,first.alpha);
 	curve.insert(curve.begin(), firstPlot.begin(), firstPlot.end());
@@ -94,7 +94,7 @@ std::vector<cv::Point3f> Parabola3D::interpolate(std::vector<cv::Point3f> pivot,
 			double off = prev.alpha - t;
 			double max = b-a;
 			curve.push_back(prev.take((1-prev.alpha)*t+prev.alpha)*(b-t) / max + next.take(next.alpha*t)*(t- a)/max);
-			cv::circle(img, Point(curve.back().x * 100, curve.back().y * 20), 3, Scalar::all(255), 1);
+			//cv::circle(img, Point(curve.back().x * 100, curve.back().y * 20), 3, Scalar::all(255), 1);
 		}
 		//prev.draw(img);
 		//next.draw(img);
@@ -106,11 +106,25 @@ std::vector<cv::Point3f> Parabola3D::interpolate(std::vector<cv::Point3f> pivot,
 	return curve;
 }
 
-void Parabola3D::draw(cv::Mat & img, std::vector<cv::Point3f> curve)
+void Parabola3D::draw(cv::Mat & img, std::vector<cv::Point3f> curve, std::vector<cv::Point3f> pivot, double f, double t, double x, double y)
 {
+	//double f = CV_PI / 4;
+	double theta = t;
+
+	cv::Mat kern = (cv::Mat_<float>(3, 3) << cos(f), sin(f)*sin(theta), -sin(f)*cos(theta),
+					0, cos(theta), sin(theta),
+					sin(f), -cos(f)*sin(theta), cos(f)*cos(theta));
+
+	for (auto i : pivot)
+	{
+		auto p = i*kern;
+		cv::circle(img, Point(p.x * 100, p.y * 20) + Point(x, y), 5, Scalar(0,0,255), -1);
+	}
+
 	for (auto i : curve)
 	{
-		cv::circle(img, Point(i.x*100, i.y*20), 3, Scalar::all(255), 1);
+		auto p = i*kern;
+		cv::circle(img, Point(p.x*100, p.y*20)+Point(x,y), 3, Scalar::all(255), 1);
 	}
 }
 

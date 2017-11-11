@@ -24,16 +24,25 @@ void click(int event, int x, int y, int flags, void *userdata)
 int main()
 {
 	Mat draw = Mat::zeros(700, 1600, CV_8UC3);
-	
-	//Parabola3D p((cv::Mat)( Mat_<float>(3,3) << -7, -48.5, -9, 10, 28.5, 14, 1, 20, 3));
-	std::vector<Point3f> pivot = { Point3f(1,2,3), Point3f(3,5,2), Point3f(4,1,1), Point3f(5,4,1), Point3f(6,3,7), Point3f(8,3,4) };
-	for (auto i : pivot)
-	{
-		circle(draw, Point(i.x * 100, i.y * 20), 7, Scalar(0, 0, 255), -1);
-	}
-	auto curve = Parabola3D::interpolate(pivot,draw);
-	Parabola3D::draw(draw, curve);
+	namedWindow("Panel");
+	int f = 0;
+	int t = 0;
+	int x = 0;
+	int y = 0;
+	createTrackbar("F", "Panel", &f, 360);
+	createTrackbar("T", "Panel", &t, 360);
+	createTrackbar("x", "Panel", &x, 360);
+	createTrackbar("y", "Panel", &y, 360);
 
-	imshow("draw", draw);
-	waitKey();
+	std::vector<Point3f> pivot = { Point3f(1,2,3), Point3f(3,5,2), Point3f(4,1,1), Point3f(5,4,1), Point3f(6,3,7), Point3f(8,3,4) };
+
+	auto curve = Parabola3D::interpolate(pivot,draw);
+	do
+	{
+		Mat cl = draw.clone();
+		Parabola3D::draw(cl, curve, pivot, f*CV_PI/180, t*CV_PI / 180, x, y);
+		imshow("draw", cl);
+	}
+	while (waitKey(30) != 27);
+
 }
