@@ -21,9 +21,15 @@
     <ClCompile Include="Parabola.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Parabola3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Parabola.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Parabola3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

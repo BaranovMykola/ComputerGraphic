@@ -155,10 +155,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Parabola.cpp" />
+    <ClCompile Include="Parabola3D.cpp" />
     <ClCompile Include="ParabolaInterpolationSource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Parabola.h" />
+    <ClInclude Include="Parabola3D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "Parabola.h"
+#include "Parabola3D.h"
 
 using namespace cv;
 using namespace std;
@@ -23,12 +24,10 @@ void click(int event, int x, int y, int flags, void *userdata)
 int main()
 {
 	Mat draw = Mat::zeros(700, 1600, CV_8UC3);
-	std::vector<Point> points{};
-	namedWindow("draw");
-	imshow("draw", draw);
-	setMouseCallback("draw", click, &make_pair(&points,&draw));
-	waitKey();
-	Parabola::interpolate(draw, points,200);
+	
+	//Parabola3D p((cv::Mat)( Mat_<float>(3,3) << -7, -48.5, -9, 10, 28.5, 14, 1, 20, 3));
+	Parabola3D p(Point3f(1, 20, 3), Point3f(2.25, 23, 4.75), Point3f(4, 0, 8));
+	p.draw(draw);
 
 	imshow("draw", draw);
 	waitKey();
