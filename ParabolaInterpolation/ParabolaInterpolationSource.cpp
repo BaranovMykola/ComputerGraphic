@@ -28,7 +28,7 @@ int main()
 	imshow("draw", draw);
 	setMouseCallback("draw", click, &make_pair(&points,&draw));
 	waitKey();
-	Parabola::interpolate(draw, points,1);
+	Parabola::interpolate(draw, points,200);
 
 	imshow("draw", draw);
 	waitKey();

@@ -5,7 +5,6 @@ class Parabola
 {
 public:
 	Parabola(double _a, double _b, double _c);
-	Parabola(double _a);
 	Parabola(cv::Point _a, cv::Point _b, cv::Point _c);
 	~Parabola();
 	double y(double x)const;

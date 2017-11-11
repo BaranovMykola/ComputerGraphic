@@ -1,12 +1,15 @@
-P1 = [1 2 3]
-P2 = [2.25 4 4.75]
-P3 = [4 7 8]
+close all
+P1 = [1 20 3]
+P2 = [2.25 23 4.75]
+P3 = [4 0 8]
 
 x = [P1(1) P2(1) P3(1)]
 y = [P1(2) P2(2) P3(2)]
 z = [P1(3) P2(3) P3(3)]
 
-M = [ 0 0 1; 0.25 0.5 1;1 1 1 ]
+a = norm(P2-P1)/(norm(P3-P2)+norm(P2-P1))
+
+M = [ 0 0 1; a^2 a 1; 1 1 1 ]
 Mi = inv(M)
 
 P = transpose([x;y;z])
@@ -26,7 +29,7 @@ figure
 hold on
 ezplot3(x0,y0,z0,[0 1])
 plot3(x,y,z,'o')
-camlight
+
 h = get(gca,'DataAspectRatio') 
 if h(3)==1
       set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
@@ -34,7 +37,30 @@ else
       set(gca,'DataAspectRatio',[1 1 h(3)])
 end
 
+xs = zeros(1,10)
+ys = zeros(1,10)
+zs = zeros(1,10)
+
+figure
+
+
 for i=0:10
-    ii = i/10
-    p = [ x0(i/10),y0(i/10),z0(i/10)]
+    xs(i+1) = x0(i/10)
+    ys(i+1) = y0(i/10)
+    zs(i+1) = z0(i/10)
 end
+
+plot3(xs,ys,zs, 'o');
+
+h = get(gca,'DataAspectRatio') 
+if h(3)==1
+      set(gca,'DataAspectRatio',[1 1 1/max(h(1:2))])
+else
+      set(gca,'DataAspectRatio',[1 1 h(3)])
+end
+grid
+
+a = pi/4
+b = 
+
+perspec = [
