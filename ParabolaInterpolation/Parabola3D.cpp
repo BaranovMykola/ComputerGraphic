@@ -1,30 +1,11 @@
 #include "Parabola3D.h"
 #include <opencv2\imgproc.hpp>
-#include <opencv2\calib3d.hpp>
+
+#include "MatrixProcessing.h"
+
 using namespace cv;
 
-cv::Point3f operator*(cv::Point3f point, cv::Mat & kern)
-{
-	cv::Point3f transformedPoint;
-	std::vector<float*> newCoordinates;
-	newCoordinates.push_back(&transformedPoint.x);
-	newCoordinates.push_back(&transformedPoint.y);
-	newCoordinates.push_back(&transformedPoint.z);
 
-	std::vector<float> oldCoordinates;
-	oldCoordinates.push_back(point.x);
-	oldCoordinates.push_back(point.y);
-	oldCoordinates.push_back(point.z);
-
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			*newCoordinates[i] += oldCoordinates[j] * kern.at<float>(j, i);
-		}
-	}
-	return transformedPoint;
-}
 
 Parabola3D::Parabola3D(cv::Mat & _data)
 {
@@ -46,23 +27,6 @@ Parabola3D::Parabola3D(cv::Point3f p1, cv::Point3f p2, cv::Point3f p3)
 
 Parabola3D::~Parabola3D()
 {
-}
-
-void Parabola3D::draw(cv::Mat & img)
-{
-	double f = CV_PI/4;
-	double theta = 33*CV_PI/180;
-
-	cv::Mat kern = (cv::Mat_<float>(3, 3) << cos(f), sin(f)*sin(theta), -sin(f)*cos(theta),
-					0, cos(theta), sin(theta),
-					sin(f), -cos(f)*sin(theta), cos(f)*cos(theta));
-
-	for (double t = alpha; t < 1; t+=0.005)
-	{
-		cv::Point3f p(x(t), y(t), z(t));
-		//auto pers = p*kern;
-		cv::circle(img, Point(p.x*100, p.y*20), 3, Scalar(255,255,0), 1);
-	}
 }
 
 std::vector<cv::Point3f> Parabola3D::plot(double h, double lowerBound, double upperBound)
@@ -106,49 +70,13 @@ std::vector<cv::Point3f> Parabola3D::interpolate(std::vector<cv::Point3f> pivot,
 	return curve;
 }
 
-namespace homogenous
-{
-	cv::Vec4f operator*(cv::Vec4f point, cv::Mat & kern)
-	{
-		Vec4f res{ 0,0,0,0 };
-
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				res[i] += point[j] * kern.at<float>(j, i);
-			}
-		}
-		return res;
-	}
-}
-
-std::vector<Point3f> applyKern(std::vector<Point3f> points, cv::Mat& kern)
-{
-	std::vector<cv::Vec4f> pivotHomogenous;
-	convertPointsToHomogeneous(points, pivotHomogenous);
-
-	for (auto& i : pivotHomogenous)
-	{
-		i = homogenous::operator*(i, kern);
-	}
-
-	std::vector<Point3f> pivotModified;
-	convertPointsFromHomogeneous(pivotHomogenous, pivotModified);
-	return pivotModified;
-}
-
 void Parabola3D::draw(cv::Mat & img, std::vector<cv::Point3f> curve, std::vector<cv::Point3f> pivot, double f, double t, std::vector<int> move, double scale)
 {
-	//double f = CV_PI / 4;
-	double theta = t;
-
 	cv::Mat moveKern = (cv::Mat_<float>(4, 4) << 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, move[0], move[1], move[2], 1);
-	cv::Mat moveBack = (cv::Mat_<float>(4, 4) << 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -move[0], -move[1], -move[2], 1);
 
-	cv::Mat _kern = (cv::Mat_<float>(4, 4) << cos(f), sin(f)*sin(theta), -sin(f)*cos(theta), 0,
-					0, cos(theta), sin(theta), 0,
-					sin(f), -cos(f)*sin(theta), cos(f)*cos(theta), 0,
+	cv::Mat _kern = (cv::Mat_<float>(4, 4) << cos(f), sin(f)*sin(t), -sin(f)*cos(t), 0,
+					0, cos(t), sin(t), 0,
+					sin(f), -cos(f)*sin(t), cos(f)*cos(t), 0,
 					0,0,0,scale);
 	Mat kern = _kern* moveKern;
 	

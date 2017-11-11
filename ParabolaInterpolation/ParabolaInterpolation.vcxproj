@@ -154,11 +154,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MatrixProcessing.cpp" />
     <ClCompile Include="Parabola.cpp" />
     <ClCompile Include="Parabola3D.cpp" />
     <ClCompile Include="ParabolaInterpolationSource.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MatrixProcessing.h" />
     <ClInclude Include="Parabola.h" />
     <ClInclude Include="Parabola3D.h" />
   </ItemGroup>
