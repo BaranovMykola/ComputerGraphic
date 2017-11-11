@@ -26,8 +26,13 @@ int main()
 	Mat draw = Mat::zeros(700, 1600, CV_8UC3);
 	
 	//Parabola3D p((cv::Mat)( Mat_<float>(3,3) << -7, -48.5, -9, 10, 28.5, 14, 1, 20, 3));
-	Parabola3D p(Point3f(1, 20, 3), Point3f(2.25, 23, 4.75), Point3f(4, 0, 8));
-	p.draw(draw);
+	std::vector<Point3f> pivot = { Point3f(1,2,3), Point3f(3,5,2), Point3f(4,1,1), Point3f(5,4,1), Point3f(6,3,7), Point3f(8,3,4) };
+	for (auto i : pivot)
+	{
+		circle(draw, Point(i.y * 100, i.z * 20), 7, Scalar(0, 0, 255), -1);
+	}
+	auto curve = Parabola3D::interpolate(pivot,draw);
+	Parabola3D::draw(draw, curve);
 
 	imshow("draw", draw);
 	waitKey();

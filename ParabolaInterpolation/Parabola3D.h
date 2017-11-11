@@ -9,10 +9,15 @@ public:
 	~Parabola3D();
 
 	void draw(cv::Mat& img);
+	std::vector<cv::Point3f> plot(double h);
+	static std::vector<cv::Point3f> interpolate(std::vector<cv::Point3f> pivot, cv::Mat& img);
+	static void draw(cv::Mat& img, std::vector<cv::Point3f> curve);
+	cv::Point3f take(double t);
 	double x(double t);
 	double y(double t);
 	double z(double t);
 
 private:
 	cv::Mat data;
+	double alpha;
 };
