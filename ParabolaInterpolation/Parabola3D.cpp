@@ -65,10 +65,10 @@ void Parabola3D::draw(cv::Mat & img)
 	}
 }
 
-std::vector<cv::Point3f> Parabola3D::plot(double h)
+std::vector<cv::Point3f> Parabola3D::plot(double h, double lowerBound, double upperBound)
 {
 	std::vector<cv::Point3f> points;
-	for (double t = 0; t <= 1; t+=h)
+	for (double t = lowerBound; t <= upperBound; t+=h)
 	{
 		points.push_back(Point3f(x(t), y(t), z(t)));
 	}
@@ -80,8 +80,8 @@ std::vector<cv::Point3f> Parabola3D::interpolate(std::vector<cv::Point3f> pivot,
 	std::vector<Point3f> curve;
 	double h = 0.0001;
 	Parabola3D first(pivot[0], pivot[1], pivot[2]);
-	//auto firstPlot = first.plot(h);
-	//curve.insert(curve.begin(), firstPlot.begin(), firstPlot.end());
+	auto firstPlot = first.plot(h,0,first.alpha);
+	curve.insert(curve.begin(), firstPlot.begin(), firstPlot.end());
 
 	for (int i = 0; i < pivot.size()-3; i++)
 	{
@@ -94,15 +94,15 @@ std::vector<cv::Point3f> Parabola3D::interpolate(std::vector<cv::Point3f> pivot,
 			double off = prev.alpha - t;
 			double max = b-a;
 			curve.push_back(prev.take((1-prev.alpha)*t+prev.alpha)*(b-t) / max + next.take(next.alpha*t)*(t- a)/max);
-			cv::circle(img, Point(curve.back().y * 100, curve.back().z * 20), 3, Scalar::all(255), 1);
+			cv::circle(img, Point(curve.back().x * 100, curve.back().y * 20), 3, Scalar::all(255), 1);
 		}
 		//prev.draw(img);
 		//next.draw(img);
 	}
 
 	Parabola3D last(pivot[pivot.size()-3], pivot[pivot.size()-2], pivot[pivot.size()-1]);
-	auto lastPlot = first.plot(h);
-	//curve.insert(curve.begin(), lastPlot.begin(), lastPlot.end());
+	auto lastPlot = last.plot(h,last.alpha,1);
+	curve.insert(curve.end(), lastPlot.begin(), lastPlot.end());
 	return curve;
 }
 
