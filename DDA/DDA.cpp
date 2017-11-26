@@ -6,7 +6,7 @@ using namespace cv;
 
 void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img)
 {
-	auto r = 3;
+	auto r = 1;
 
 	circle(img, A, r, Scalar::all(255), -1);
 	circle(img, B, r, Scalar::all(255), -1);
@@ -15,7 +15,7 @@ void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img)
 	double dx = (B.x - A.x) / steps;
 	double dy = (B.y - A.y) / steps;
 
-	for (double i = 0; i < steps; i++)
+	for (double i = 0; i < steps+1; i++)
 	{
 		img.at<Vec3b>(A) = Vec3b(0, 0, 255);
 		A.x += dx;
