@@ -2,9 +2,21 @@
 #include <opencv2\highgui.hpp>
 #include <opencv2\imgproc.hpp>
 
+#include <iostream>
+
 #include "DDA.h"
 
 using namespace cv;
+
+void butt(int state, void *userdata)
+{
+	std::cout << "clicked";
+}
+
+void on_trackbar(int, void* data)
+{
+	*(static_cast<bool*>(data)) = true;
+}
 
 int main(int arg, char* argv[])
 {
@@ -18,25 +30,40 @@ int main(int arg, char* argv[])
 	Point center(16, 16);
 	int radius = 10;
 	int count = 4;
-	createTrackbar("O.x", win, &center.x, img.cols-1);
-	createTrackbar("O.y", win, &center.y, img.rows-1);
-	createTrackbar("Radius", win, &radius, 16);
-	createTrackbar("Count", win, &count, 15);
-	
+	bool onChange = true;
+	createTrackbar("O.x", win, &center.x, img.cols-1, on_trackbar, &onChange);
+	createTrackbar("O.y", win, &center.y, img.rows-1, on_trackbar, &onChange);
+	createTrackbar("Radius", win, &radius, 16, on_trackbar, &onChange);
+	createTrackbar("Count", win, &count, 30, on_trackbar, &onChange);
 
 	while (waitKey(30) != 27)
 	{
-		Mat draw = img.clone();
-		auto points = getPointsOnCircle(center, radius, count,draw);
-		for (auto i : points)
+		try
 		{
-			DDA(center, i, draw);
-			draw.at<Vec3b>(i) = Vec3b::all(255);
+			Mat draw = img.clone();
+			auto points = getPointsOnCircle(center, radius, count,draw);
+
+			for (auto i : points)
+			{
+				DDA(center, i, draw, onChange);
+				draw.at<Vec3b>(i) = Vec3b::all(255);
+			}
+
+			draw.at<Vec3b>(center) = Vec3b(0, 255, 0);
+			Mat scaled;
+			cv::resize(draw, scaled, draw.size() * 20,0,0,INTER_NEAREST);
+			imshow("Line",scaled);
+
+			if (onChange)
+			{
+				std::cout << "**********************" << std::endl;
+			}
+			onChange = false;
 		}
-		draw.at<Vec3b>(center) = Vec3b(0, 255, 0);
-		Mat scaled;
-		cv::resize(draw, scaled, draw.size() * 20,0,0,INTER_NEAREST);
-		imshow("Line",scaled);
+		catch (...)
+		{
+			std::cout << "Circle is out of range" << std::endl;
+		}
 	}
 	return 0;
 }

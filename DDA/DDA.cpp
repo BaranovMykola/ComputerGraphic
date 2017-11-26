@@ -2,9 +2,11 @@
 
 #include <opencv2\imgproc.hpp>
 
+#include <iostream>
+
 using namespace cv;
 
-void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img)
+void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img, bool info)
 {
 	auto r = 1;
 
@@ -18,6 +20,10 @@ void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img)
 	for (double i = 0; i < steps+1; i++)
 	{
 		img.at<Vec3b>(A) = Vec3b(0, 0, 255);
+		if (info)
+		{
+			std::cout << "Plot " << A << std::endl;
+		}	
 		A.x += dx;
 		A.y += dy;
 	}
@@ -42,13 +48,24 @@ std::vector<cv::Point> getPointsOnCircle(cv::Point center, int r, int n, cv::Mat
 
 	for (double t = 0; t < CV_2PI- CV_2PI / (2*n); t += CV_2PI/n)
 	{
+		double s = std::sin(t);
+		double c = std::cos(t);
 		Point p
 		(
-			std::sin(t)*r + center.x,
-			std::cos(t)*r + center.y
+			std::rint(std::sin(t)*r + center.x),
+			std::rint(std::cos(t)*r + center.y)
 		);
 
 		set.push_back(p);
+	}
+
+	auto p = set;
+	for (auto i : p)
+	{
+		auto diff = i - center;
+		auto j = i - diff * 2;
+		//set.push_back(j);
+		//img.at<Vec3b>(j) = Vec3b(255,255,0);
 	}
 
 	return set;
