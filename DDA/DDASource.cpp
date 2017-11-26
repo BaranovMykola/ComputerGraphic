@@ -15,15 +15,25 @@ int main(int arg, char* argv[])
 
 	std::string win = "Point flow";
 	namedWindow(win);
-	createTrackbar("A.x", win, &A.x, img.cols-1);
-	createTrackbar("A.y", win, &A.y, img.rows-1);
-	createTrackbar("B.x", win, &B.x, img.cols-1);
-	createTrackbar("B.y", win, &B.y, img.rows-1);
+	Point center(16, 16);
+	int radius = 10;
+	int count = 4;
+	createTrackbar("O.x", win, &center.x, img.cols-1);
+	createTrackbar("O.y", win, &center.y, img.rows-1);
+	createTrackbar("Radius", win, &radius, 16);
+	createTrackbar("Count", win, &count, 15);
 	
+
 	while (waitKey(30) != 27)
 	{
 		Mat draw = img.clone();
-		DDA(B, A, draw);
+		auto points = getPointsOnCircle(center, radius, count,draw);
+		for (auto i : points)
+		{
+			DDA(center, i, draw);
+			draw.at<Vec3b>(i) = Vec3b::all(255);
+		}
+		draw.at<Vec3b>(center) = Vec3b(0, 255, 0);
 		Mat scaled;
 		cv::resize(draw, scaled, draw.size() * 20,0,0,INTER_NEAREST);
 		imshow("Line",scaled);

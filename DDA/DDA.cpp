@@ -8,8 +8,8 @@ void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img)
 {
 	auto r = 1;
 
-	circle(img, A, r, Scalar::all(255), -1);
-	circle(img, B, r, Scalar::all(255), -1);
+	/*circle(img, A, r, Scalar::all(255), -1);
+	circle(img, B, r, Scalar::all(255), -1);*/
 
 	double steps = std::max(abs(A.x - B.x), abs(A.y - B.y));
 	double dx = (B.x - A.x) / steps;
@@ -21,4 +21,35 @@ void DDA(cv::Point2f A, cv::Point2f B, cv::Mat & img)
 		A.x += dx;
 		A.y += dy;
 	}
+}
+
+std::vector<cv::Point> getPointsOnCircle(cv::Point center, int r, int n, cv::Mat & img)
+{
+	if (!img.empty())
+	{
+		for (double t = 0; t < 2*CV_PI; t+=0.01)
+		{
+			Point p
+			(
+				std::sin(t)*r + center.x,
+				std::cos(t)*r + center.y
+			);
+
+		}
+	}
+
+	std::vector<cv::Point> set;
+
+	for (double t = 0; t < CV_2PI- CV_2PI / (2*n); t += CV_2PI/n)
+	{
+		Point p
+		(
+			std::sin(t)*r + center.x,
+			std::cos(t)*r + center.y
+		);
+
+		set.push_back(p);
+	}
+
+	return set;
 }
